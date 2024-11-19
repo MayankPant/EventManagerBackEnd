@@ -4,3 +4,4 @@ events/__pycache__
 userauth/__pycache__
 events/migrations/__pycache__
 userauth/migrations/__pycache__
+*.env
