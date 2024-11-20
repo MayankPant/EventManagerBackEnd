@@ -1,39 +1,34 @@
 from django.db import models
 from userauth.models import UserProfile  # Import the custom user model
+from datetime import datetime
+
 
 class Event(models.Model):
-    DAILY = 'daily'
-    WEEKLY = 'weekly'
-    MONTHLY = 'monthly'
-    YEARLY = 'yearly'
-
-    RECURRENCE_CHOICES = [
-        (DAILY, 'Daily'),
-        (WEEKLY, 'Weekly'),
-        (MONTHLY, 'Monthly'),
-        (YEARLY, 'Yearly'),
-    ]
-
-    name = models.CharField(max_length=255)
-    description = models.TextField()
-    location = models.CharField(max_length=255)
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
+    location = models.CharField(max_length=200)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
-    capacity = models.PositiveIntegerField()
-    is_recurring = models.BooleanField(default=False)
-    recurrence_pattern = models.CharField(
-        max_length=20,
-        choices=RECURRENCE_CHOICES,
-        blank=True,
-        null=True
-    )
-    recurrence_end_date = models.DateField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
+    created_by = models.ForeignKey(UserProfile, on_delete=models.CASCADE, default=None)
+    recurrence_rule = models.JSONField(blank=True, null=True)  # Store recurrence rules here
+    
     def __str__(self):
         return self.name
 
+    def get_next_occurrences(self, limit=5):
+        """
+        Implement logic here to calculate the next `limit` occurrences based on `recurrence_rule`.
+        You can use libraries like `rrule` for recurring rules or implement your own logic.
+        """
+        if not self.recurrence_rule:
+            return []
+
+        # Example logic for weekly recurrence (you can expand this based on your rules)
+        from dateutil.rrule import rrulestr
+        from datetime import timedelta
+        
+        rule = rrulestr(self.recurrence_rule)
+        return list(rule[:limit])
 
 
 
